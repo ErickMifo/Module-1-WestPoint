@@ -12,6 +12,8 @@ export const DashBoardContainer = styled.div`
 `;
 
 export const PriceContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   text-align: center;
   width: 100%;
   background-color: white;
