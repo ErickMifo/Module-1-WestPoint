@@ -20,6 +20,11 @@ export const PriceContainer = styled.div`
   padding: 20vh 3rem;
   margin-bottom: 1rem;
   background-color: var(--background);
+  border-radius: 5px;
+
+  button {
+    margin-right:0.75rem;
+  }
 `;
 
 export const SellBuyCotainer = styled.div`
@@ -35,7 +40,17 @@ export const SellBuyCotainer = styled.div`
   flex-direction: column;
   background-color: var(--background);
   background-color: white;
-  width: 40%;
+  width: 45%;
   height: 100%;
+  border-radius: 5px;
+  }
+
+  p {
+    margin-top: 0.5rem;
   }
 `;
+
+export const ButtonContainer = styled.div`
+  flex-direction: row;
+
+  `;

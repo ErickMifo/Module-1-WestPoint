@@ -2,18 +2,24 @@ import React, { useState, useEffect } from 'react';
 import instance from '../../axios/axios';
 import Button from '../Button';
 import {
+  ButtonContainer,
   DashBoardContainer, PriceContainer, SellBuyCotainer,
 } from './styles';
+import { useTransition } from '../../context/transitionContext';
 
 function DashBoard() {
+  const { history, setHistory } = useTransition();
+
   const [USD, setUSD] = useState('');
   const [GBP, setGBP] = useState('');
 
   useEffect(() => {
     async function getData() {
-      const requestCurrency = await instance.get('');
-      setGBP(requestCurrency.data.rates.GBP);
-      setUSD(requestCurrency.data.rates.USD);
+      const requestGBP = await instance.get('latest?base=GBP');
+      setUSD(requestGBP.data.rates.USD);
+
+      const requestUSD = await instance.get('latest?base=USD');
+      setGBP(requestUSD.data.rates.GBP);
     }
 
     getData();
@@ -23,38 +29,38 @@ function DashBoard() {
     <DashBoardContainer>
 
       <PriceContainer>
+        <h2>Trade British Pound / US Dollar</h2>
+        <ButtonContainer>
 
-        <p>
-          Price base on Euro
-        </p>
+          <Button
+            onClick={() => {
+              setHistory([...history, `buy for ${USD}`]);
+            }}
+            bgColor="var(--blue)"
+          >
+            Buy
+            <p>
+              {USD}
+            </p>
+          </Button>
 
-        <p>
-          USD Price:
-          {' '}
-          {USD}
-        </p>
+          <Button
+            onClick={() => {
+              setHistory([...history, `sell for ${GBP}`]);
+            }}
+            bgColor="var(--red)"
+          >
+            Sell
+            <p>
+              {GBP}
+            </p>
+          </Button>
 
-        <p>
-          GBP Price:
-          {' '}
-          {GBP}
-        </p>
+        </ButtonContainer>
       </PriceContainer>
 
       <SellBuyCotainer>
-
-        <div>
-          <Button>
-            Buy
-          </Button>
-        </div>
-
-        <div>
-          <Button>
-            Sell
-          </Button>
-        </div>
-
+        <div />
       </SellBuyCotainer>
 
     </DashBoardContainer>

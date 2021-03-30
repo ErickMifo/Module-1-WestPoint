@@ -11,10 +11,11 @@ const HistoryContainer = styled.div`
 
   div {
     background-color: var(--background);
+    max-height: 80vh;
     width: 100%;
-    height: 100%;
+    height: 80vh;
     border-radius: 5px;
-
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
   }
