@@ -9,6 +9,10 @@ const HistoryContainer = styled.div`
   background-color: var(--blue-dark);
   color: var(--blue-dark);
 
+  h2 {
+    text-align: center;
+  }
+
   div {
     background-color: var(--background);
     max-height: 80vh;

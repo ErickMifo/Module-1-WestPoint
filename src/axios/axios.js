@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const instance = axios.create({
-  baseURL: 'https://api.exchangeratesapi.io',
+const instanceHistory = axios.create({
+  baseURL: 'http://localhost:3001',
 });
 
-export default instance;
+export default instanceHistory;

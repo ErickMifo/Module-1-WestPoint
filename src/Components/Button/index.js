@@ -7,7 +7,7 @@ const SellBuyButton = styled.button`
     border-radius: 10px;
     font-size: 1.25rem;
     padding: 4px 12px;
-    width: 40%;
+    width: 50%;
     align-self: center;
     transition-duration: 0.4s;
     margin-top: 1rem;

@@ -21,10 +21,6 @@ export const PriceContainer = styled.div`
   margin-bottom: 1rem;
   background-color: var(--background);
   border-radius: 5px;
-
-  button {
-    margin-right:0.75rem;
-  }
 `;
 
 export const SellBuyCotainer = styled.div`
@@ -33,7 +29,7 @@ export const SellBuyCotainer = styled.div`
   justify-content: space-around;
   align-items: center;
   text-align: center;
-  height: 30vh;
+  height: 35vh;
 
   div {
   display: flex;
@@ -49,8 +45,3 @@ export const SellBuyCotainer = styled.div`
     margin-top: 0.5rem;
   }
 `;
-
-export const ButtonContainer = styled.div`
-  flex-direction: row;
-
-  `;

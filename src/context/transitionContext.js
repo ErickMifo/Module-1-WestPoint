@@ -5,8 +5,12 @@ export const TransitionContext = createContext();
 // eslint-disable-next-line react/prop-types
 export default function TransitionProvider({ children }) {
   const [history, setHistory] = useState([]);
+  const [dbHistory, setDbHistory] = useState([]);
   return (
-    <TransitionContext.Provider value={{ history, setHistory }}>
+    <TransitionContext.Provider value={{
+      history, setHistory, dbHistory, setDbHistory,
+    }}
+    >
       {children}
     </TransitionContext.Provider>
 
@@ -15,6 +19,10 @@ export default function TransitionProvider({ children }) {
 
 export function useTransition() {
   const context = useContext(TransitionContext);
-  const { history, setHistory } = context;
-  return { history, setHistory };
+  const {
+    history, setHistory, dbHistory, setDbHistory,
+  } = context;
+  return {
+    history, setHistory, dbHistory, setDbHistory,
+  };
 }
