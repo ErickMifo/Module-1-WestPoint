@@ -66,6 +66,7 @@ input[type="number"] {
 
 button {
   cursor: pointer;
+  border: none;
 }
 
 a {

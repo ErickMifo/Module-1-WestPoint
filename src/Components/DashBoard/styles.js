@@ -11,16 +11,19 @@ export const DashBoardContainer = styled.div`
   color: var(--blue-dark);
 `;
 
-export const PriceContainer = styled.div`
+export const GraphContainer = styled.div`
   display: flex;
   flex-direction: column;
   text-align: center;
   width: 100%;
-  background-color: white;
-  padding: 20vh 3rem;
+  padding: 0.5rem 3rem;
   margin-bottom: 1rem;
   background-color: var(--background);
   border-radius: 5px;
+
+  h3 {
+    padding-top: 1rem;
+  }
 `;
 
 export const SellBuyCotainer = styled.div`

@@ -1,36 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import instanceHistory from '../../axios/axios';
-import Button from '../Button';
+import { instance } from '../../axios/axios';
 import {
-  DashBoardContainer, PriceContainer, SellBuyCotainer,
+  DashBoardContainer, GraphContainer, SellBuyCotainer,
 } from './styles';
-import { useTransition } from '../../context/transitionContext';
+import { useTransaction } from '../../context/transactionContext';
 import Input from '../Input';
+import Graph from '../Graph';
+import SellBuyButton from '../Button/sellBuyButton';
+import WalltetButton from '../Button/walletButton';
+import Wallet from '../Wallet/wallet';
 
 let socket;
 
 function DashBoard() {
-  const { history, setHistory } = useTransition();
+  const {
+    history,
+    setHistory,
+    walletGBP,
+    walletUSD,
+    setWalletGBP,
+    setWalletUSD,
+  } = useTransaction();
+
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+
+  const onOpen = () => {
+    setIsWalletOpen(true);
+  };
+
+  const onClose = () => {
+    setIsWalletOpen(false);
+  };
+
+  const [USD, setUSD] = useState('');
+  const [GBP, setGBP] = useState('');
 
   const [inputValue2, setInputValue2] = useState();
   const [inputValue1, setInputValue1] = useState();
-  const [USD, setUSD] = useState('1.38334');
-  const [GBP, setGBP] = useState('1.38433');
-
-  const ENDPOINT = 'http://localhost:3001/';
 
   useEffect(() => {
-    socket = io(ENDPOINT);
-    console.log(socket);
-    socket.on('test', (arg) => {
-      setUSD(arg.GBP_USD);
-      setGBP(1 / arg.GBP_USD);
-    });
-  }, [ENDPOINT]);
+    instance.put('wallet/1', { USD: walletUSD });
+    instance.put('wallet/2', { GBP: walletGBP });
+  }, [walletUSD, walletGBP]);
 
-  const roundGBP = Math.round(GBP * 1000) / 1000;
+  useEffect(() => {
+    async function getData() {
+      const request = await instance.get('currency');
+      setUSD(request.data[0].USD);
+      setGBP(request.data[1].GBP);
+      const walletRequest = await instance.get('wallet');
+      setWalletUSD(walletRequest.data[0].USD);
+      setWalletGBP(walletRequest.data[1].GBP);
+    }
+
+    getData();
+  }, []);
+
   const roundUSD = Math.round(USD * 1000) / 1000;
+  const roundGBP = Math.round(GBP * 1000) / 1000;
+
+  const ENDPOINT = 'http://localhost:3001/';
+  socket = io(ENDPOINT);
+  socket.on('GBPUSD', (arg) => {
+    setUSD(arg.GBP_USD);
+    setGBP(1 / arg.GBP_USD);
+  });
+
+  if (USD || GBP !== '' || NaN) {
+    instance.put('currency/1', { USD: roundUSD });
+    instance.put('currency/2', { GBP: roundGBP });
+  }
 
   const handleChange2 = (e) => { setInputValue2(e.target.value); };
   const handleChange1 = (e) => { setInputValue1(e.target.value); };
@@ -38,80 +78,122 @@ function DashBoard() {
   return (
     <DashBoardContainer>
 
-      <PriceContainer>
+      <GraphContainer>
 
-        <h2>Container 1</h2>
+        <WalltetButton onClick={onOpen} />
+        <h3> Base EUR </h3>
+        {isWalletOpen ? <Wallet onClick={onClose} /> : null}
 
-      </PriceContainer>
+        <Graph />
+
+      </GraphContainer>
 
       <SellBuyCotainer>
         <div>
+
           GBP to USD
+
           <Input type="number" value={inputValue1} onChange={handleChange1} />
-          <Button
+
+          <SellBuyButton
+            disabled={!!(inputValue1 === undefined || inputValue1 <= 0)}
             onClick={() => {
-              setHistory([...history, `Buy ${inputValue1} USD for ${roundUSD * inputValue1} GBP`]);
-              instanceHistory.post('history', {
-                history: `Buy ${inputValue1} USD for ${roundUSD * inputValue1} GBP`,
+              setWalletGBP(walletGBP - inputValue1);
+              setWalletUSD(Math.round(roundUSD * inputValue1 * 1000) / 1000 + walletUSD);
+              setHistory([...history, `Buy ${inputValue1} USD for ${Math.round(roundUSD * inputValue1 * 1000) / 1000} GBP`]);
+              instance.post('history', {
+                history: `Buy ${inputValue1} USD for ${Math.round(roundUSD * inputValue1 * 1000) / 1000} GBP`,
               });
             }}
             bgColor="var(--blue)"
           >
-            Buy
-            <p>
-              {inputValue1 == null || inputValue1 <= 0 ? roundUSD : roundUSD * inputValue1}
-            </p>
-          </Button>
 
-          <Button
+            Buy
+
+            <p>
+              {inputValue1 === undefined || inputValue1 <= 0
+                ? roundUSD
+                : Math.round(roundUSD * inputValue1 * 1000) / 1000}
+            </p>
+
+          </SellBuyButton>
+
+          <SellBuyButton
+            disabled={!!(inputValue1 === undefined || inputValue1 <= 0)}
             onClick={() => {
-              setHistory([...history, `Sell ${inputValue1} USD for ${roundGBP * inputValue1} GBP`]);
-              instanceHistory.post('history', {
-                history: `Sell ${inputValue1} USD for ${roundGBP * inputValue1} GBP`,
+              setWalletGBP(walletGBP + inputValue1);
+              setWalletUSD(walletUSD - Math.round(roundUSD * inputValue1 * 1000) / 1000);
+              setHistory([...history, `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`]);
+              instance.post('history', {
+                history: `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`,
               });
             }}
             bgColor="var(--red)"
           >
+
             Sell
+
             <p>
-              {inputValue1 == null || inputValue1 <= 0 ? roundGBP : roundGBP * inputValue1}
+              {inputValue1 === undefined || inputValue1 <= 0
+                ? roundGBP
+                : Math.round(roundGBP * inputValue1 * 1000) / 1000}
             </p>
-          </Button>
+
+          </SellBuyButton>
 
         </div>
 
         <div>
+
           USD to GBP
+
           <Input type="number" value={inputValue2} onChange={handleChange2} />
-          <Button
+
+          <SellBuyButton
+            disabled={!!(inputValue2 === undefined || inputValue2 <= 0)}
             onClick={() => {
-              setHistory([...history, `Buy ${inputValue2} GBP for ${roundGBP * inputValue2} USD`]);
-              instanceHistory.post('history', {
-                history: `Buy ${inputValue2} GBP for ${roundGBP * inputValue2} USD`,
+              setWalletUSD(walletUSD - inputValue2);
+              setWalletGBP(Math.round(roundGBP * inputValue2 * 1000) / 1000 + walletGBP);
+              setHistory([...history, `Buy ${inputValue2} GBP for ${Math.round(roundGBP * inputValue2 * 1000) / 1000} USD`]);
+              instance.post('history', {
+                history: `Buy ${inputValue2} GBP for ${Math.round(roundGBP * inputValue2 * 1000) / 1000} USD`,
               });
             }}
             bgColor="var(--blue)"
           >
-            Buy
-            <p>
-              {inputValue2 == null || inputValue2 <= 0 ? roundGBP : roundGBP * inputValue2}
-            </p>
-          </Button>
 
-          <Button
+            Buy
+
+            <p>
+              {inputValue2 === undefined || inputValue2 <= 0
+                ? roundGBP
+                : Math.round(roundGBP * inputValue2 * 1000) / 1000}
+            </p>
+
+          </SellBuyButton>
+
+          <SellBuyButton
+            disabled={!!(inputValue2 === undefined || inputValue2 <= 0)}
             onClick={() => {
-              setHistory([...history, `Sell ${inputValue2} GBP for ${roundUSD * inputValue2} USD`]);
-              instanceHistory.post('history', {
-                history: `Sell ${inputValue2} for ${roundUSD * inputValue2} USD`,
+              setWalletUSD(walletUSD + inputValue2);
+              setWalletGBP(walletGBP - Math.round(roundGBP * inputValue2 * 1000) / 1000);
+              setHistory([...history, `Sell ${inputValue2} GBP for ${Math.round(roundUSD * inputValue2 * 1000) / 1000} USD`]);
+              instance.post('history', {
+                history: `Sell ${inputValue2} for ${Math.round(roundUSD * inputValue2 * 1000) / 1000} USD`,
               });
             }}
             bgColor="var(--red)"
           >
+
             Sell
+
             <p>
-              {inputValue2 == null || inputValue2 <= 0 ? roundUSD : roundUSD * inputValue2}
+              {inputValue2 === undefined || inputValue2 <= 0
+                ? roundUSD
+                : Math.round(roundUSD * inputValue2 * 1000) / 1000}
             </p>
-          </Button>
+
+          </SellBuyButton>
 
         </div>
       </SellBuyCotainer>

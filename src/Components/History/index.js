@@ -1,15 +1,15 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useEffect } from 'react';
 import HistoryContainer from './styles';
-import { useTransition } from '../../context/transitionContext';
-import instanceHistory from '../../axios/axios';
+import { useTransaction } from '../../context/transactionContext';
+import { instance } from '../../axios/axios';
 
 function History() {
-  const { history, dbHistory, setDbHistory } = useTransition();
+  const { history, dbHistory, setDbHistory } = useTransaction();
 
   useEffect(() => {
     async function getHistoryData() {
-      const requestHistory = await instanceHistory.get('history');
+      const requestHistory = await instance.get('history');
       setDbHistory(requestHistory.data);
     }
 
