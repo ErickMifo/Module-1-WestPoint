@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import HistoryContainer from './styles';
 import { useTransaction } from '../../context/transactionContext';
-import { instance } from '../../axios/axios';
+import instance from '../../axios/axios';
 
 function History() {
   const { history, dbHistory, setDbHistory } = useTransaction();

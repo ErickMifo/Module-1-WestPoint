@@ -1,10 +1,11 @@
+/* eslint-disable no-console */
 import React, { useEffect, useState } from 'react';
 import {
   Legend,
   Line, LineChart, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import io from 'socket.io-client';
-import { instance } from '../../axios/axios';
+import instance from '../../axios/axios';
 
 let socket;
 
@@ -26,13 +27,20 @@ function Graph() {
   }, []);
 
   const ENDPOINT = 'http://localhost:3001/';
-  socket = io(ENDPOINT);
-  socket.on('graph', (arg) => {
-    setDate(Object.keys(arg.EUR_GBP));
-    setUSDValue(Object.values(arg.EUR_USD));
-    setGBPValue(Object.values(arg.data.EUR_GBP));
-  });
 
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.once('connect', () => {
+      console.log('connected');
+    });
+    socket.on('graph', (arg) => {
+      setDate(Object.keys(arg.EUR_GBP));
+      setUSDValue(Object.values(arg.EUR_USD));
+      setGBPValue(Object.values(arg.EUR_GBP));
+    });
+  }, [ENDPOINT]);
+
+  // when either USDvalue, GBPvalue or date change, update the database.
   useEffect(() => {
     instance.put('graph/1', {
       graphDate: date[0],
@@ -54,9 +62,9 @@ function Graph() {
       USD: USDvalue[3],
       GBP: GBPvalue[3],
     });
-    console.log(date, USDvalue, GBPvalue);
-  }, [date]);
+  }, [USDvalue, date, GBPvalue]);
 
+  // using the right format for recharts library.
   const data = [
     {
       date: date[0],

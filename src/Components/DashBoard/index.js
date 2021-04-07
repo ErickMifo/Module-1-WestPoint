@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import { instance } from '../../axios/axios';
+import instance from '../../axios/axios';
 import {
   DashBoardContainer, GraphContainer, SellBuyCotainer,
 } from './styles';
@@ -39,6 +39,7 @@ function DashBoard() {
   const [inputValue2, setInputValue2] = useState();
   const [inputValue1, setInputValue1] = useState();
 
+  // Update USD and GBP wallet values on mongodb when they change.
   useEffect(() => {
     instance.put('wallet/1', { USD: walletUSD });
     instance.put('wallet/2', { GBP: walletGBP });
@@ -60,13 +61,18 @@ function DashBoard() {
   const roundUSD = Math.round(USD * 1000) / 1000;
   const roundGBP = Math.round(GBP * 1000) / 1000;
 
+  // update GBP and USD values with socket.io.
   const ENDPOINT = 'http://localhost:3001/';
-  socket = io(ENDPOINT);
-  socket.on('GBPUSD', (arg) => {
-    setUSD(arg.GBP_USD);
-    setGBP(1 / arg.GBP_USD);
-  });
 
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.on('GBPUSD', (arg) => {
+      setUSD(arg.GBP_USD);
+      setGBP(1 / arg.GBP_USD);
+    });
+  }, [ENDPOINT]);
+
+  // prevent USD and GBP values to be saved with wrong values.
   if (USD || GBP !== '' || NaN) {
     instance.put('currency/1', { USD: roundUSD });
     instance.put('currency/2', { GBP: roundGBP });
@@ -121,8 +127,8 @@ function DashBoard() {
           <SellBuyButton
             disabled={!!(inputValue1 === undefined || inputValue1 <= 0)}
             onClick={() => {
-              setWalletGBP(walletGBP + inputValue1);
-              setWalletUSD(walletUSD - Math.round(roundUSD * inputValue1 * 1000) / 1000);
+              setWalletGBP(walletGBP + Math.round(roundUSD * inputValue1 * 1000) / 1000);
+              setWalletUSD(walletUSD - inputValue1);
               setHistory([...history, `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`]);
               instance.post('history', {
                 history: `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`,
