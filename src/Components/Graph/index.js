@@ -91,7 +91,7 @@ function Graph() {
   return (
     <LineChart width={500} height={230} data={data}>
       <XAxis dataKey="date" />
-      <YAxis type="number" domain={[0.7, 1.5]} />
+      <YAxis type="number" domain={[0.7, 1.3]} />
       <Legend />
       <Tooltip />
       <Line isAnimationActive={false} dataKey="USD" />
