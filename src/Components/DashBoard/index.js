@@ -24,11 +24,9 @@ function DashBoard() {
   } = useTransaction();
 
   const [isWalletOpen, setIsWalletOpen] = useState(false);
-
   const onOpen = () => {
     setIsWalletOpen(true);
   };
-
   const onClose = () => {
     setIsWalletOpen(false);
   };
@@ -36,8 +34,9 @@ function DashBoard() {
   const [USD, setUSD] = useState('');
   const [GBP, setGBP] = useState('');
 
-  const [inputValue2, setInputValue2] = useState();
-  const [inputValue1, setInputValue1] = useState();
+  // since the value is started as a string, need to use parseFloat() in the future.
+  const [inputValue2, setInputValue2] = useState('');
+  const [inputValue1, setInputValue1] = useState('');
 
   // Update USD and GBP wallet values on mongodb when they change.
   useEffect(() => {
@@ -45,6 +44,7 @@ function DashBoard() {
     instance.put('wallet/2', { GBP: walletGBP });
   }, [walletUSD, walletGBP]);
 
+  // getting data from my own api.
   useEffect(() => {
     async function getData() {
       const request = await instance.get('currency');
@@ -73,11 +73,10 @@ function DashBoard() {
   }, [ENDPOINT]);
 
   // prevent USD and GBP values to be saved with wrong values.
-  if (USD || GBP !== '' || NaN) {
+  if (USD && GBP !== '') {
     instance.put('currency/1', { USD: roundUSD });
     instance.put('currency/2', { GBP: roundGBP });
   }
-
   const handleChange2 = (e) => { setInputValue2(e.target.value); };
   const handleChange1 = (e) => { setInputValue1(e.target.value); };
 
@@ -102,10 +101,10 @@ function DashBoard() {
           <Input type="number" value={inputValue1} onChange={handleChange1} />
 
           <SellBuyButton
-            disabled={!!(inputValue1 === undefined || inputValue1 <= 0)}
+            disabled={!!(inputValue1 === '' || inputValue1 <= 0)}
             onClick={() => {
-              setWalletGBP(walletGBP - inputValue1);
-              setWalletUSD(Math.round(roundUSD * inputValue1 * 1000) / 1000 + walletUSD);
+              setWalletGBP(walletGBP - Math.round(roundUSD * inputValue1 * 1000) / 1000);
+              setWalletUSD(walletUSD + parseFloat(inputValue1));
               setHistory([...history, `Buy ${inputValue1} USD for ${Math.round(roundUSD * inputValue1 * 1000) / 1000} GBP`]);
               instance.post('history', {
                 history: `Buy ${inputValue1} USD for ${Math.round(roundUSD * inputValue1 * 1000) / 1000} GBP`,
@@ -117,7 +116,7 @@ function DashBoard() {
             Buy
 
             <p>
-              {inputValue1 === undefined || inputValue1 <= 0
+              {inputValue1 === '' || inputValue1 <= 0
                 ? roundUSD
                 : Math.round(roundUSD * inputValue1 * 1000) / 1000}
             </p>
@@ -125,10 +124,10 @@ function DashBoard() {
           </SellBuyButton>
 
           <SellBuyButton
-            disabled={!!(inputValue1 === undefined || inputValue1 <= 0)}
+            disabled={!!(inputValue1 === '' || inputValue1 <= 0)}
             onClick={() => {
-              setWalletGBP(walletGBP + Math.round(roundUSD * inputValue1 * 1000) / 1000);
-              setWalletUSD(walletUSD - inputValue1);
+              setWalletGBP(walletGBP + Math.round(roundGBP * inputValue1 * 1000) / 1000);
+              setWalletUSD(walletUSD - parseFloat(inputValue1));
               setHistory([...history, `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`]);
               instance.post('history', {
                 history: `Sell ${inputValue1} USD for ${Math.round(roundGBP * inputValue1 * 1000) / 1000} GBP`,
@@ -140,7 +139,7 @@ function DashBoard() {
             Sell
 
             <p>
-              {inputValue1 === undefined || inputValue1 <= 0
+              {inputValue1 === '' || inputValue1 <= 0
                 ? roundGBP
                 : Math.round(roundGBP * inputValue1 * 1000) / 1000}
             </p>
@@ -156,10 +155,10 @@ function DashBoard() {
           <Input type="number" value={inputValue2} onChange={handleChange2} />
 
           <SellBuyButton
-            disabled={!!(inputValue2 === undefined || inputValue2 <= 0)}
+            disabled={!!(inputValue2 === '' || inputValue2 <= 0)}
             onClick={() => {
-              setWalletUSD(walletUSD - inputValue2);
-              setWalletGBP(Math.round(roundGBP * inputValue2 * 1000) / 1000 + walletGBP);
+              setWalletUSD(walletUSD - Math.round(roundGBP * inputValue2 * 1000) / 1000);
+              setWalletGBP(walletGBP + parseFloat(inputValue2));
               setHistory([...history, `Buy ${inputValue2} GBP for ${Math.round(roundGBP * inputValue2 * 1000) / 1000} USD`]);
               instance.post('history', {
                 history: `Buy ${inputValue2} GBP for ${Math.round(roundGBP * inputValue2 * 1000) / 1000} USD`,
@@ -171,7 +170,7 @@ function DashBoard() {
             Buy
 
             <p>
-              {inputValue2 === undefined || inputValue2 <= 0
+              {inputValue2 === '' || inputValue2 <= 0
                 ? roundGBP
                 : Math.round(roundGBP * inputValue2 * 1000) / 1000}
             </p>
@@ -179,10 +178,10 @@ function DashBoard() {
           </SellBuyButton>
 
           <SellBuyButton
-            disabled={!!(inputValue2 === undefined || inputValue2 <= 0)}
+            disabled={!!(inputValue2 === '' || inputValue2 <= 0)}
             onClick={() => {
-              setWalletUSD(walletUSD + inputValue2);
-              setWalletGBP(walletGBP - Math.round(roundGBP * inputValue2 * 1000) / 1000);
+              setWalletUSD(walletUSD + Math.round(roundUSD * inputValue2 * 1000) / 1000);
+              setWalletGBP(walletGBP - parseFloat(inputValue2));
               setHistory([...history, `Sell ${inputValue2} GBP for ${Math.round(roundUSD * inputValue2 * 1000) / 1000} USD`]);
               instance.post('history', {
                 history: `Sell ${inputValue2} for ${Math.round(roundUSD * inputValue2 * 1000) / 1000} USD`,
@@ -194,7 +193,7 @@ function DashBoard() {
             Sell
 
             <p>
-              {inputValue2 === undefined || inputValue2 <= 0
+              {inputValue2 === '' || inputValue2 <= 0
                 ? roundUSD
                 : Math.round(roundUSD * inputValue2 * 1000) / 1000}
             </p>
