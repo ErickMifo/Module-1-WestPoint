@@ -73,7 +73,7 @@ function DashBoard() {
   }, [ENDPOINT]);
 
   // prevent USD and GBP values to be saved with wrong values.
-  if (USD && GBP !== '') {
+  if ((USD && GBP !== '') && (!Number.isNaN(GBP) || !Number.isNaN(USD))) {
     instance.put('currency/1', { USD: roundUSD });
     instance.put('currency/2', { GBP: roundGBP });
   }
